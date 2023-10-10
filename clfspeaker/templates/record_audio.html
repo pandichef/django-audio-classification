@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Record Audio</title>
+</head>
+<body>
+  <button id="startRecord">Start Recording</button>
+  <button id="stopRecord" disabled>Stop Recording</button>
+  <div id="results"></div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      let mediaRecorder;
+      let audioChunks = [];
+      let mediaStream;
+      const startRecordButton = document.getElementById("startRecord");
+      const stopRecordButton = document.getElementById("stopRecord");
+      const resultsDiv = document.getElementById("results");
+
+      async function recordAndSend() {
+        mediaRecorder.start();
+        setTimeout(() => {
+          mediaRecorder.stop();
+        }, 3000);
+      }
+
+      startRecordButton.addEventListener("click", async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaStream = stream;
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = event => {
+          audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+          const formData = new FormData();
+          formData.append('audio_file', audioBlob);
+
+          const response = await fetch('/upload/', {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+          resultsDiv.innerHTML += `<p>${data.status}</p>`;
+          audioChunks = [];
+          if (!stopRecordButton.disabled) {
+            recordAndSend();
+          }
+        };
+
+        startRecordButton.disabled = true;
+        stopRecordButton.disabled = false;
+        recordAndSend();
+      });
+
+      stopRecordButton.addEventListener("click", () => {
+        stopRecordButton.disabled = true;
+        startRecordButton.disabled = false;
+
+        // Stop media stream tracks
+        mediaStream.getTracks().forEach(track => track.stop());
+
+        mediaRecorder.stop();
+      });
+    });
+  </script>
+</body>
+</html>
