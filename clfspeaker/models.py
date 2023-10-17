@@ -7,7 +7,7 @@ from transformers import (
     AutoFeatureExtractor,
 )
 
-tokenizer = AutoTokenizer.from_pretrained("facebook/wav2vec2-base")
+# tokenizer = AutoTokenizer.from_pretrained("facebook/wav2vec2-base")
 feature_extractor = AutoFeatureExtractor.from_pretrained("facebook/wav2vec2-base")
 model_path = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "facebook_wav2vec2-base_tuned",
@@ -17,7 +17,7 @@ model = AutoModelForAudioClassification.from_pretrained(model_path)
 clf = pipeline(
     "audio-classification",
     model=model,
-    tokenizer=tokenizer,
+    # tokenizer=tokenizer,
     feature_extractor=feature_extractor,
 )
 

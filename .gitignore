@@ -163,3 +163,8 @@ cython_debug/
 db.sqlite3
 pytorch_model.bin
 audio/
+a
+b
+c
+d1
+d2
